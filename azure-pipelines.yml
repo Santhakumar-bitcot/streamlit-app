@@ -19,21 +19,20 @@ stages:
       vmImage: ubuntu-latest
 
     steps:
-    - checkout: self  # ✅ This checks out the GitHub repo code
-    
+    - checkout: self
+
     - task: Docker@2
       displayName: Login to ACR
       inputs:
         command: login
-        containerRegistry: 'streamlit-acr-connection'  # This is the Docker Registry connection, even for ACR
-
+        containerRegistry: 'streamlit-acr-connection'  # ACR Docker Registry type
 
     - task: Docker@2
       displayName: Build Docker image
       inputs:
         command: build
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        repository: $(acrLoginServer)/$(imageName)
+        repository: '$(imageName)'  # ✅ Only repo name, NOT acrLoginServer here
         tags: |
           $(tag)
           latest
@@ -42,7 +41,7 @@ stages:
       displayName: Push Docker image to ACR
       inputs:
         command: push
-        repository: $(acrLoginServer)/$(imageName)
+        repository: '$(imageName)'  # ✅ Only repo name, not full URL
         tags: |
           $(tag)
           latest
@@ -63,4 +62,4 @@ stages:
         appName: $(webAppName)
         resourceGroupName: $(resourceGroup)
         containers: |
-          $(acrLoginServer)/$(imageName):latest
+          $(acrLoginServer)/$(imageName):$(tag)
