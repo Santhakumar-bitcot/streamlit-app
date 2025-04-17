@@ -1,0 +1,28 @@
+image: mcr.microsoft.com/azure-cli:latest
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Deploy Infrastructure and App
+          script:
+            # Install Bicep
+            - curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+            - chmod +x ./bicep
+            - mv ./bicep /usr/local/bin/bicep
+            
+            # Login to Azure
+            - az login --service-principal -u $AZURE_APP_ID -p $AZURE_PASSWORD --tenant $AZURE_TENANT_ID
+            
+            # Deploy using Bicep
+            - az deployment group create --resource-group streamlit-rg --template-file bicep/main.bicep
+            
+            # Make startup script executable
+            - chmod +x startup.sh
+            
+            # Create deployment package
+            - apt-get update && apt-get install -y zip
+            - zip -r app.zip app.py requirements.txt startup.sh
+            
+            # Deploy app code
+            - az webapp deployment source config-zip --resource-group streamlit-rg --name streamlit-on-azure --src app.zip
