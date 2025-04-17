@@ -19,20 +19,20 @@ stages:
       vmImage: ubuntu-latest
 
     steps:
-    - checkout: self
+    - checkout: self  # ✅ Checkout repo code
 
     - task: Docker@2
       displayName: Login to ACR
       inputs:
         command: login
-        containerRegistry: 'streamlit-acr-connection'  # ACR Docker Registry type
+        containerRegistry: 'streamlit-acr-connection'  # Must match ACR service connection name in Azure DevOps
 
     - task: Docker@2
       displayName: Build Docker image
       inputs:
         command: build
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        repository: '$(imageName)'  # ✅ Only repo name, NOT acrLoginServer here
+        repository: '$(imageName)'  # Only repo name
         tags: |
           $(tag)
           latest
@@ -41,25 +41,20 @@ stages:
       displayName: Push Docker image to ACR
       inputs:
         command: push
-        repository: '$(imageName)'  # ✅ Only repo name, not full URL
+        repository: '$(imageName)'  # Only repo name
         tags: |
           $(tag)
           latest
 
-- stage: DeployToWebApp
-  displayName: Deploy to Azure Web App
-  dependsOn: BuildAndPush
-  jobs:
-  - job: Deploy
-    displayName: Deploy to Web App for Containers
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - task: AzureWebAppContainer@1
-      displayName: Deploy to Web App
+    - task: AzureCLI@2
+      displayName: Configure Web App to Use Docker Image
       inputs:
-        azureSubscription: 'streamlit-rg-connection'
-        appName: $(webAppName)
-        resourceGroupName: $(resourceGroup)
-        containers: |
-          $(acrLoginServer)/$(imageName):$(tag)
+        azureSubscription: 'streamlit-rg-connection'  # Replace with your Azure service connection name
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az webapp config container set \
+            --name $(webAppName) \
+            --resource-group $(resourceGroup) \
+            --container-image-name $(acrLoginServer)/$(imageName):$(tag) \
+            --container-registry-url https://$(acrLoginServer)
