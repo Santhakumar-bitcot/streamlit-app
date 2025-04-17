@@ -1,4 +1,5 @@
 image: mcr.microsoft.com/azure-cli:latest
+
 pipelines:
   branches:
     main:
