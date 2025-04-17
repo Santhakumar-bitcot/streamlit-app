@@ -20,6 +20,13 @@ stages:
 
     steps:
     - checkout: self  # ✅ This checks out the GitHub repo code
+    
+    - task: Docker@2
+      displayName: Login to ACR
+      inputs:
+        command: login
+        containerRegistry: 'streamlit-acr-connection'  # This is the Docker Registry connection, even for ACR
+
 
     - task: Docker@2
       displayName: Build Docker image
