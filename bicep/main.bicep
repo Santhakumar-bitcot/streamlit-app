@@ -123,6 +123,6 @@ resource acrTask 'Microsoft.ContainerRegistry/registries/tasks@2025-03-01-previe
           }
         ]
       }
-      isSystemTask: true
+    //   isSystemTask: true
     }
   }
