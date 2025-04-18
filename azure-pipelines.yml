@@ -58,3 +58,6 @@ stages:
             --resource-group $(resourceGroup) \
             --container-image-name $(acrLoginServer)/$(imageName):$(tag) \
             --container-registry-url https://$(acrLoginServer)
+
+
+          az webapp restart --name $(webAppName) --resource-group $(resourceGroup)
