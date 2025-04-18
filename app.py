@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-st.title("📊 Streamlit App on Azure - NEW ONE")
+st.title("📊 Streamlit App - OLDER")
 
 st.sidebar.header("User Input")
 num_points = st.sidebar.slider("Number of data points", 10, 100, 50)
